@@ -19,46 +19,9 @@
 #
 ############################
 
-# optionnal for a batch launch :   klayout -b -rd input=my_layout.gds -rd report=my_report.lyrdb -rd schematic=reference_netlist.cir -rd target_netlist=extracted_netlist.cir -r sky130.lvs
-if $input
-  source($input)
-end
-
-if $report
-  report($report)
-else
-  report_lvs("lvs_report.lvsdb")
-end
-
-if $schematic
-#reference netlist
-   schematic($schematic)
-else 
-   schematic("sky130_fd_sc_hs.cdl")
-end
-
-# true: use net names instead of numbers
-# false: use numbers for nets
-spice_with_net_names = true
-
-# true: put in comments with details
-# false: no comments
-spice_with_comments = false
-
-if $target_netlist
-  target_netlist($target_netlist)
-else
-   # target_netlist("netlist.cir", write_spice(spice_with_net_names, spice_with_comments), "The netlist comment goes here.") 
-   target_netlist(File.join(File.dirname(RBA::CellView::active.filename), source.cell_name+"_extracted.cir"), write_spice(spice_with_net_names, spice_with_comments),  "Extracted by KLayout on : #{Time.now.strftime("%d/%m/%Y %H:%M")}")
-end
-
-# Hierarchical mode
-deep
-# Use 4 CPU cores
-threads(4)
-# Print details
-verbose(true)
-
+# LVS section
+########################
+info("LVS section")
 
 # layers definitions
 ########################
@@ -150,7 +113,7 @@ PSD = PDIFF - PGATE
 STD_PGATE = PGATE - HVTP - NCM - HVI
 HVT_PGATE = PGATE &amp; HVTP - NCM - HVI
 HV5_PGATE = PGATE - HVTP - NCM &amp; HVI
-  
+
 NDIFF = DIFF - NWELL &amp; NSDM
 PTAP = TAP - NWELL &amp; PSDM
 NGATE = NDIFF &amp; POLY
@@ -161,18 +124,18 @@ HV5_NGATE = NGATE - NCM - LVTN &amp; HVI
 HV5NA_NGATE = NGATE - NCM &amp; LVTN &amp; HVI
 
 # drawing to physical
-device_scaling(1000000)
+#device_scaling(1000000)
 
 # PMOS transistor device extraction
-extract_devices(mos4("pfet_01v8"), { "SD" =&gt; PSD, "G" =&gt; STD_PGATE, "tS" =&gt; PSD, "tD" =&gt; PSD, "tG" =&gt; POLY, "W" =&gt; NWELL })
-extract_devices(mos4("pfet_01v8_hvt"), { "SD" =&gt; PSD, "G" =&gt; HVT_PGATE, "tS" =&gt; PSD, "tD" =&gt; PSD, "tG" =&gt; POLY, "W" =&gt; NWELL })
-extract_devices(mos4("pfet_g5v0d10v5"), { "SD" =&gt; PSD, "G" =&gt; HV5_PGATE, "tS" =&gt; PSD, "tD" =&gt; PSD, "tG" =&gt; POLY, "W" =&gt; NWELL })
+extract_devices(mos4("sky130_fd_pr__pfet_01v8"), { "SD" =&gt; PSD, "G" =&gt; STD_PGATE, "tS" =&gt; PSD, "tD" =&gt; PSD, "tG" =&gt; POLY, "W" =&gt; NWELL })
+extract_devices(mos4("sky130_fd_pr__pfet_01v8_hvt"), { "SD" =&gt; PSD, "G" =&gt; HVT_PGATE, "tS" =&gt; PSD, "tD" =&gt; PSD, "tG" =&gt; POLY, "W" =&gt; NWELL })
+extract_devices(mos4("sky130_fd_pr__pfet_g5v0d10v5"), { "SD" =&gt; PSD, "G" =&gt; HV5_PGATE, "tS" =&gt; PSD, "tD" =&gt; PSD, "tG" =&gt; POLY, "W" =&gt; NWELL })
 
 # NMOS transistor device extraction
-extract_devices(mos4("nfet_01v8"), { "SD" =&gt; NSD, "G" =&gt; STD_NGATE, "tS" =&gt; NSD, "tD" =&gt; NSD, "tG" =&gt; POLY, "W" =&gt; SUB })
-extract_devices(mos4("nfet_01v8_lvt"), { "SD" =&gt; NSD, "G" =&gt; LVT_NGATE, "tS" =&gt; NSD, "tD" =&gt; NSD, "tG" =&gt; POLY, "W" =&gt; SUB })
-extract_devices(mos4("nfet_g5v0d10v5"), { "SD" =&gt; NSD, "G" =&gt; HV5_NGATE, "tS" =&gt; NSD, "tD" =&gt; NSD, "tG" =&gt; POLY, "W" =&gt; SUB })
-extract_devices(mos4("nfet_01v8_nvt"), { "SD" =&gt; NSD, "G" =&gt; HV5NA_NGATE, "tS" =&gt; NSD, "tD" =&gt; NSD, "tG" =&gt; POLY, "W" =&gt; SUB })
+extract_devices(mos4("sky130_fd_pr__nfet_01v8"), { "SD" =&gt; NSD, "G" =&gt; STD_NGATE, "tS" =&gt; NSD, "tD" =&gt; NSD, "tG" =&gt; POLY, "W" =&gt; SUB })
+extract_devices(mos4("sky130_fd_pr__nfet_01v8_lvt"), { "SD" =&gt; NSD, "G" =&gt; LVT_NGATE, "tS" =&gt; NSD, "tD" =&gt; NSD, "tG" =&gt; POLY, "W" =&gt; SUB })
+extract_devices(mos4("sky130_fd_pr__nfet_g5v0d10v5"), { "SD" =&gt; NSD, "G" =&gt; HV5_NGATE, "tS" =&gt; NSD, "tD" =&gt; NSD, "tG" =&gt; POLY, "W" =&gt; SUB })
+extract_devices(mos4("sky130_fd_pr__nfet_01v8_nvt"), { "SD" =&gt; NSD, "G" =&gt; HV5NA_NGATE, "tS" =&gt; NSD, "tD" =&gt; NSD, "tG" =&gt; POLY, "W" =&gt; SUB })
 
 
 # Define connectivity for netlist extraction
@@ -209,7 +172,14 @@ connect(MET4, MET4TXT)
 connect(MET5, MET5TXT)
 
 # Global
-connect_global(SUB, "VNB")
+connect_global(SUB, "gnd")
+
+if $connect_supplies
+connect_implicit("*", "vdd")
+connect_implicit("*", "gnd")
+end
+
+connect_global(NWELL, "NWELL")
 
 # Actually performs the extraction
 netlist # ... not really required
@@ -280,7 +250,7 @@ equivalent_pins("*XNOR2_2", "A", "B")
 #max_res(1000000)
 #min_caps(1e-15)
 
-if ! compare 
+if ! compare
   #raise "ERROR : Netlists don't match"
   puts "ERROR : Netlists don't match"
 else
